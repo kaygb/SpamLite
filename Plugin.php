@@ -60,6 +60,15 @@ class SpamLite_Plugin implements Typecho_Plugin_Interface
         $words_sensitive_email = new Typecho_Widget_Helper_Form_Element_Textarea('words_sensitive_email', NULL, "",
             _t('敏感邮箱词汇'), _t('多条词汇请用换行符隔开'));
         $form->addInput($words_sensitive_email);
+
+        $opt_sensitive_ip = new Typecho_Widget_Helper_Form_Element_Radio('opt_sensitive_ip',
+            array("none" => "无动作", "waiting" => "标记为待审核", "abandon" => "评论失败"), "none",
+            _t('敏感IP操作'), "如果评论者的IP在此列表中，将执行该操作");
+        $form->addInput($opt_sensitive_ip);
+
+        $words_sensitive_ip = new Typecho_Widget_Helper_Form_Element_Textarea('words_sensitive_ip', NULL, "",
+            _t('敏感IP'), _t('多个IP请用换行符隔开'));
+        $form->addInput($words_sensitive_ip);
     }
 
     public static function personalConfig(Typecho_Widget_Helper_Form $form){}
@@ -110,6 +119,14 @@ class SpamLite_Plugin implements Typecho_Plugin_Interface
             if (SpamLite_Plugin::check_in($filter_set->words_sensitive_email, $comment['mail'])) {
                 $error = "评论者的邮箱包含敏感词汇";
                 $opt = $filter_set->opt_sensitive_email;
+            }
+        }
+
+        // 检查敏感IP
+        if ($opt == "none" && $filter_set->opt_sensitive_ip != "none" && !empty($comment['ip'])) {
+            if (SpamLite_Plugin::check_in($filter_set->words_sensitive_ip, $comment['ip'])) {
+                $error = "评论者的IP在敏感IP列表中";
+                $opt = $filter_set->opt_sensitive_ip;
             }
         }
 

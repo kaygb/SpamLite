@@ -82,6 +82,14 @@ class SpamLite_Plugin implements Typecho_Plugin_Interface
         $opt = "none";
         $error = "";
 
+        // 检查敏感IP
+        if ($opt == "none" && $filter_set->opt_sensitive_ip != "none" && !empty($comment['ip'])) {
+            if (SpamLite_Plugin::check_in($filter_set->words_sensitive_ip, $comment['ip'])) {
+                $error = "评论者的IP在敏感IP列表中";
+                $opt = $filter_set->opt_sensitive_ip;
+            }
+        }
+
         // 检查敏感词汇
         if ($opt == "none" && $filter_set->opt_sensitive_words != "none") {
             if (SpamLite_Plugin::check_in($filter_set->words_sensitive, $comment['text'])) {
@@ -119,14 +127,6 @@ class SpamLite_Plugin implements Typecho_Plugin_Interface
             if (SpamLite_Plugin::check_in($filter_set->words_sensitive_email, $comment['mail'])) {
                 $error = "评论者的邮箱包含敏感词汇";
                 $opt = $filter_set->opt_sensitive_email;
-            }
-        }
-
-        // 检查敏感IP
-        if ($opt == "none" && $filter_set->opt_sensitive_ip != "none" && !empty($comment['ip'])) {
-            if (SpamLite_Plugin::check_in($filter_set->words_sensitive_ip, $comment['ip'])) {
-                $error = "评论者的IP在敏感IP列表中";
-                $opt = $filter_set->opt_sensitive_ip;
             }
         }
 
